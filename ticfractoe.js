@@ -1,3 +1,24 @@
+/**global: console */
+function GameSaverSession() {
+}
+GameSaverSession.prototype = {
+  loggedIn: false,
+  
+  login: function gss_login(onLoginComplete) {
+    this._onLoginComplete = onLoginComplete || function () {};
+    navigator.id.getVerifiedEmail(this._gotVerifiedEmail);
+  },
+  
+  _gotVerifiedEmail: function gss_gotVerifiedEmail(assertion) {
+    if (assertion) {
+      this.loggedIn = true;
+      this._onLoginComplete.call();
+    } else {
+      console.log("Email verification failed");
+    }
+  }
+};
+
 // grab some settings from the query string
 var settings = { boardsize: 300, maxdepth: 2 };
 try {
@@ -135,8 +156,31 @@ function showSekrit()
   return false;
 }
 
+var gameSaverSession;
+
+function onLoginComplete() {
+
+    $("#login").hide();
+    $("#loadsave").show();
+    
+    // XXX check to see if there's a saved game  
+}
+
 function onLoad()
 {
+
+  gameSaverSession = new GameSaverSession();
+
+  // XXX if cookie, set state to logged in
+   
+  // XXX else set up for login
+  
+  // hide our loading & saving
+  $("#loadsave").hide();
+
+  // tell it to initiate the process when clicked
+  $("#login").click(function () { gameSaverSession.login(onLoginComplete) });
+
   if(settings.sekrit) {
     showSekrit();
   }
