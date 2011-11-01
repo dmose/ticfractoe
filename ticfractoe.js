@@ -1,4 +1,5 @@
-/**global: console */
+/*global console,$ */
+
 function GameSaverSession() {
 }
 GameSaverSession.prototype = {
@@ -6,7 +7,9 @@ GameSaverSession.prototype = {
   
   login: function gss_login(onLoginComplete) {
     this._onLoginComplete = onLoginComplete || function () {};
-    navigator.id.getVerifiedEmail(this._gotVerifiedEmail);
+    
+    // XXX only works in browsers that support ECMAscript bind
+    navigator.id.getVerifiedEmail(this._gotVerifiedEmail.bind(this));
   },
   
   _gotVerifiedEmail: function gss_gotVerifiedEmail(assertion) {
@@ -156,8 +159,6 @@ function showSekrit()
   return false;
 }
 
-var gameSaverSession;
-
 function onLoginComplete() {
 
     $("#login").hide();
@@ -165,6 +166,8 @@ function onLoginComplete() {
     
     // XXX check to see if there's a saved game  
 }
+
+var gameSaverSession;
 
 function onLoad()
 {
