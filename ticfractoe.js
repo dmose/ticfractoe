@@ -3,6 +3,7 @@
 function GameSaverSession() {
 }
 GameSaverSession.prototype = {
+  emailAddress: null,
   loggedIn: false,
   
   login: function gss_login(onLoginComplete) {
@@ -13,11 +14,29 @@ GameSaverSession.prototype = {
   },
   
   _gotVerifiedEmail: function gss_gotVerifiedEmail(assertion) {
+    var self = this;
+    var audience = document.domain || 'null';
     if (assertion) {
-      this.loggedIn = true;
-      this._onLoginComplete.call();
+      $.ajax({
+        type: 'POST',
+        // XXX you didn't see the hardcoded localhost here.  just keep moving.
+        url: 'http://localhost:54321/api/login',
+        data: { assertion: assertion, audience: audience },
+        success: function(res, status, xhr) {
+          if (res) {
+            self.emailAddress = res;
+            self._onLoginComplete();
+            self.loggedIn = true;
+          } else {
+            console.log("BrowserID validation async POST failure");
+          }
+        },
+        error: function(res, status, xhr) {  
+          console.log("BrowserID validation sync POST failure");
+        }
+      });
     } else {
-      console.log("Email verification failed");
+      console.log("BrowserID validation failed: no assertion returned");
     }
   }
 };
@@ -160,11 +179,8 @@ function showSekrit()
 }
 
 function onLoginComplete() {
-
     $("#login").hide();
     $("#loadsave").show();
-    
-    // XXX check to see if there's a saved game  
 }
 
 var gameSaverSession;
